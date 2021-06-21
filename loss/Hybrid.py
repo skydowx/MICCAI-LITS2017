@@ -20,9 +20,9 @@ class HybridLoss(nn.Module):
 
         smooth = 1
 
-        # dice系数的定义
+        # Definition of dice coefficient
         dice = 2 * (pred * target).sum(dim=1).sum(dim=1).sum(dim=1) / (pred.pow(2).sum(dim=1).sum(dim=1).sum(dim=1) +
                                             target.pow(2).sum(dim=1).sum(dim=1).sum(dim=1) + smooth)
 
-        # 返回的是dice距离 +　二值化交叉熵损失
+        # What is returned is dice distance + 　 binarized cross entropy loss
         return torch.clamp((1 - dice).mean(), 0, 1) + self.bce_loss(pred, target) * self.bce_weight

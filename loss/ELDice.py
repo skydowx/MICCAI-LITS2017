@@ -17,9 +17,9 @@ class ELDiceLoss(nn.Module):
 
         smooth = 1
 
-        # dice系数的定义
+        # Definition of dice coefficient
         dice = 2 * (pred * target).sum(dim=1).sum(dim=1).sum(dim=1) / (pred.pow(2).sum(dim=1).sum(dim=1).sum(dim=1) +
                                             target.pow(2).sum(dim=1).sum(dim=1).sum(dim=1) + smooth)
 
-        # 返回的是dice距离
+        # What is returned is the dice distance
         return torch.clamp((torch.pow(-torch.log(dice + 1e-5), 0.3)).mean(), 0, 2)

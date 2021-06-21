@@ -1,6 +1,6 @@
 """
 
-查看肝脏区域像素点个数占据只包含肝脏区域的slice的百分比
+View the percentage of the number of pixels in the liver area occupying the slice that only contains the liver area
 """
 
 import os
@@ -35,5 +35,5 @@ for seg_file in tqdm(os.listdir(para.train_seg_path)):
 
 print(total_liver_point / total_point)
 
-# 训练集 6.99%
-# 测试集 6.97%
+# Training set 6.99%
+# Test set 6.97%

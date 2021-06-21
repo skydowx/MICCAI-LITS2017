@@ -1,6 +1,6 @@
 """
 
-torch中的Dataset定义脚本
+Dataset definition script in torch
 """
 
 import os
@@ -32,25 +32,25 @@ class Dataset(dataset):
         ct_path = self.ct_list[index]
         seg_path = self.seg_list[index]
 
-        # 将CT和金标准读入到内存中
+        # Read CT and gold standard into memory
         ct = sitk.ReadImage(ct_path, sitk.sitkInt16)
         seg = sitk.ReadImage(seg_path, sitk.sitkUInt8)
 
         ct_array = sitk.GetArrayFromImage(ct)
         seg_array = sitk.GetArrayFromImage(seg)
 
-        # min max 归一化
+        # min max normalization
         ct_array = ct_array.astype(np.float32)
         ct_array = ct_array / 200
 
-        # 在slice平面内随机选取48张slice
+        # Randomly select 48 slices in the slice plane
         start_slice = random.randint(0, ct_array.shape[0] - para.size)
         end_slice = start_slice + para.size - 1
 
         ct_array = ct_array[start_slice:end_slice + 1, :, :]
         seg_array = seg_array[start_slice:end_slice + 1, :, :]
 
-        # 处理完毕，将array转换为tensor
+        # After processing, convert the array to tensor
         ct_array = torch.FloatTensor(ct_array).unsqueeze(0)
         seg_array = torch.FloatTensor(seg_array)
 

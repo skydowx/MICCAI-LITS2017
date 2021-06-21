@@ -1,6 +1,6 @@
 """
 
-查看数据轴向spacing分布
+View data axial spacing distribution
 """
 
 import os
@@ -30,5 +30,5 @@ print('mean:', sum(spacing_list) / len(spacing_list))
 spacing_list.sort()
 print(spacing_list)
 
-# 训练集中的平均spacing是1.59mm
-# 测试集中的数据的spacing都是1mm
+# The average spacing in the training set is 1.59mm
+# The spacing of the data in the test set is 1mm

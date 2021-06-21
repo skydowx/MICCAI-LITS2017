@@ -1,49 +1,47 @@
-# -----------------------路径相关参数---------------------------------------
+# -----------------------Path related parameters---------------------------------------
 
-train_ct_path = '/home/zcy/Desktop/dataset/MICCAI-LITS-2017/train/CT/'  # 原始训练集CT数据路径
+train_ct_path = '/home/zcy/Desktop/dataset/MICCAI-LITS-2017/train/CT/'  # CT data path of the original training set
 
-train_seg_path = '/home/zcy/Desktop/dataset/MICCAI-LITS-2017/train/seg/'  # 原始训练集标注数据路径
+train_seg_path = '/home/zcy/Desktop/dataset/MICCAI-LITS-2017/train/seg/'  # Original training set labeled data path
 
-test_ct_path = '/home/zcy/Desktop/dataset/MICCAI-LITS-2017/test/CT/'  # 原始测试集CT数据路径
+test_ct_path = '/home/zcy/Desktop/dataset/MICCAI-LITS-2017/test/CT/'  # CT data path of the original test set
 
-test_seg_path = '/home/zcy/Desktop/dataset/MICCAI-LITS-2017/test/seg/'  # 原始测试集标注数据路径
+test_seg_path = '/home/zcy/Desktop/dataset/MICCAI-LITS-2017/test/seg/'  # Original test set labeled data path
 
-training_set_path = './train/'  # 用来训练网络的数据保存地址
+training_set_path = './train/'  # Data storage address used to train the network
 
-pred_path = '/home/zcy/Desktop/dataset/MICCAI-LITS-2017/test/liver_pred'  # 网络预测结果保存路径
+pred_path = '/home/zcy/Desktop/dataset/MICCAI-LITS-2017/test/liver_pred'  # Save path of network prediction results
 
-crf_path = '/home/zcy/Desktop/dataset/MICCAI-LITS-2017/test/crf'  # CRF优化结果保存路径
+crf_path = '/home/zcy/Desktop/dataset/MICCAI-LITS-2017/test/crf'  # CRF optimization result save path
 
-module_path = './module/net550-0.028-0.022.pth'  # 测试模型地址
+module_path = './module/net550-0.028-0.022.pth'  # Test model address
 
-# -----------------------路径相关参数---------------    ------------------------
-
-
-# ---------------------训练数据获取相关参数-----------------------------------
-
-size = 48  # 使用48张连续切片作为网络的输入
-
-down_scale = 0.5  # 横断面降采样因子
-
-expand_slice = 20  # 仅使用包含肝脏以及肝脏上下20张切片作为训练样本
-
-slice_thickness = 1  # 将所有数据在z轴的spacing归一化到1mm
-
-upper, lower = 200, -200  # CT数据灰度截断窗口
-
-# ---------------------训练数据获取相关参数-----------------------------------
+# -----------------------Path related parameters--------------------------
 
 
-# -----------------------网络结构相关参数------------------------------------
+# ---------------------Training data to obtain relevant parameters---------
 
-drop_rate = 0.3  # dropout随机丢弃概率
+size = 48  # Use 48 consecutive slices as input to the network
 
-# -----------------------网络结构相关参数------------------------------------
+down_scale = 0.5  # Cross-sectional downsampling factor
 
+expand_slice = 20  # Only use the liver and the upper and lower 20 slices of the liver as training samples
 
-# ---------------------网络训练相关参数--------------------------------------
+slice_thickness = 1  # Normalize the spacing of all data on the z-axis to 1mm
 
-gpu = '0'  # 使用的显卡序号
+upper, lower = 200, -200  # CT data gray-scale truncation window
+
+# ---------------------Training data to obtain relevant parameters---------
+
+# -----------------------Network structure related parameters-------------
+
+drop_rate = 0.3  # dropout random drop probability
+
+# ---------------------Parameters relevant to training---------------------
+
+# ---------------------Network training related parameters----------------
+
+gpu = '0'  # Graphic card identifier
 
 Epoch = 1000
 
@@ -51,7 +49,7 @@ learning_rate = 1e-4
 
 learning_rate_decay = [500, 750]
 
-alpha = 0.33  # 深度监督衰减系数
+alpha = 0.33  # Depth supervision attenuation coefficient
 
 batch_size = 1
 
@@ -61,26 +59,24 @@ pin_memory = True
 
 cudnn_benchmark = True
 
-# ---------------------网络训练相关参数--------------------------------------
+# ---------------------Network training related parameters----------------
 
+# ----------------------Model test related parameters----------------------
 
-# ----------------------模型测试相关参数-------------------------------------
+threshold = 0.5  # Threshold degree threshold
 
-threshold = 0.5  # 阈值度阈值
+stride = 12  # Sliding sampling step
 
-stride = 12  # 滑动取样步长
+maximum_hole = 5e4  # Largest void area
 
-maximum_hole = 5e4  # 最大的空洞面积
+# ----------------------Model test related parameters----------------------
 
-# ----------------------模型测试相关参数-------------------------------------
+# ---------------------CRF post-processing optimization related parameters-
 
+z_expand, x_expand, y_expand = 10, 30, 30  # The number of expansions in three directions based on the predicted results
 
-# ---------------------CRF后处理优化相关参数----------------------------------
+max_iter = 20  # Number of CRF iterations
 
-z_expand, x_expand, y_expand = 10, 30, 30  # 根据预测结果在三个方向上的扩展数量
+s1, s2, s3 = 1, 10, 10  # CRF Gaussian kernel parameters
 
-max_iter = 20  # CRF迭代次数
-
-s1, s2, s3 = 1, 10, 10  # CRF高斯核参数
-
-# ---------------------CRF后处理优化相关参数----------------------------------
+# ---------------------CRF post-processing optimization related parameters-

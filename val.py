@@ -1,6 +1,6 @@
 """
 
-测试脚本
+Test script
 """
 
 import os
@@ -23,14 +23,14 @@ import parameter as para
 
 os.environ['CUDA_VISIBLE_DEVICES'] = para.gpu
 
-# 为了计算dice_global定义的两个变量
+# In order to calculate the two variables defined by dice_global
 dice_intersection = 0.0  
 dice_union = 0.0
 
-file_name = []  # 文件名称
-time_pre_case = []  # 单例数据消耗时间
+file_name = []  
+time_pre_case = []  # Singleton data consumption time
 
-# 定义评价指标
+# Define evaluation indicators
 liver_score = collections.OrderedDict()
 liver_score['dice'] = []
 liver_score['jacard'] = []
@@ -41,7 +41,7 @@ liver_score['assd'] = []
 liver_score['rmsd'] = []
 liver_score['msd'] = []
 
-# 定义网络并加载参数
+# Define the network and load the parameters
 net = torch.nn.DataParallel(ResUNet(training=False)).cuda()
 net.load_state_dict(torch.load(para.module_path))
 net.eval()
@@ -52,24 +52,24 @@ for file_index, file in enumerate(os.listdir(para.test_ct_path)):
 
     file_name.append(file)
 
-    # 将CT读入内存
+    # Read CT into memory
     ct = sitk.ReadImage(os.path.join(para.test_ct_path, file), sitk.sitkInt16)
     ct_array = sitk.GetArrayFromImage(ct)
 
     origin_shape = ct_array.shape
     
-    # 将灰度值在阈值之外的截断掉
+    # Truncate the gray value outside the threshold
     ct_array[ct_array > para.upper] = para.upper
     ct_array[ct_array < para.lower] = para.lower
 
-    # min max 归一化
+    # min max normalization
     ct_array = ct_array.astype(np.float32)
     ct_array = ct_array / 200
 
-    # 对CT使用双三次算法进行插值，插值之后的array依然是int16
+    # Interpolate CT using bicubic algorithm, and the array after interpolation is still int16
     ct_array = ndimage.zoom(ct_array, (1, para.down_scale, para.down_scale), order=3)
 
-    # 对slice过少的数据使用padding
+    # Use padding for data with too few slices
     too_small = False
     if ct_array.shape[0] < para.size:
         depth = ct_array.shape[0]
@@ -78,7 +78,7 @@ for file_index, file in enumerate(os.listdir(para.test_ct_path)):
         ct_array = temp 
         too_small = True
 
-    # 滑动窗口取样预测
+    # Sliding window sampling prediction
     start_slice = 0
     end_slice = start_slice + para.size - 1
     count = np.zeros((ct_array.shape[0], 512, 512), dtype=np.int16)
@@ -95,7 +95,7 @@ for file_index, file in enumerate(os.listdir(para.test_ct_path)):
             count[start_slice: end_slice + 1] += 1
             probability_map[start_slice: end_slice + 1] += np.squeeze(outputs.cpu().detach().numpy())
 
-            # 由于显存不足，这里直接保留ndarray数据，并在保存之后直接销毁计算图
+            # Due to insufficient video memory, the ndarray data is directly retained here, and the calculation graph is directly destroyed after saving
             del outputs      
             
             start_slice += para.stride
@@ -122,12 +122,12 @@ for file_index, file in enumerate(os.listdir(para.test_ct_path)):
             temp += pred_seg[0: depth]
             pred_seg = temp
 
-    # 将金标准读入内存
+    # Read the gold standard into memory
     seg = sitk.ReadImage(os.path.join(para.test_seg_path, file.replace('volume', 'segmentation')), sitk.sitkUInt8)
     seg_array = sitk.GetArrayFromImage(seg)
     seg_array[seg_array > 0] = 1
 
-    # 对肝脏进行最大连通域提取,移除细小区域,并进行内部的空洞填充
+    # Extract the largest connected domain of the liver, remove small areas, and fill in the internal holes
     pred_seg = pred_seg.astype(np.uint8)
     liver_seg = copy.deepcopy(pred_seg)
     liver_seg = measure.label(liver_seg, 4)
@@ -147,7 +147,7 @@ for file_index, file in enumerate(os.listdir(para.test_ct_path)):
     morphology.remove_small_holes(liver_seg, para.maximum_hole, connectivity=2, in_place=True)
     liver_seg = liver_seg.astype(np.uint8)
 
-    # 计算分割评价指标
+    # Calculate segmentation evaluation index
     liver_metric = Metirc(seg_array, liver_seg, ct.GetSpacing())
 
     liver_score['dice'].append(liver_metric.get_dice_coefficient()[0])
@@ -162,7 +162,7 @@ for file_index, file in enumerate(os.listdir(para.test_ct_path)):
     dice_intersection += liver_metric.get_dice_coefficient()[1]
     dice_union += liver_metric.get_dice_coefficient()[2]
 
-    # 将预测的结果保存为nii数据
+    # Save the predicted result as nii data
     pred_seg = sitk.GetImageFromArray(liver_seg)
 
     pred_seg.SetDirection(ct.GetDirection())
@@ -178,7 +178,7 @@ for file_index, file in enumerate(os.listdir(para.test_ct_path)):
     print('-----------------------')
 
 
-# 将评价指标写入到exel中
+# Write evaluation indicators into exel
 liver_data = pd.DataFrame(liver_score, index=file_name)
 liver_data['time'] = time_pre_case
 
@@ -193,5 +193,5 @@ liver_data.to_excel(writer, 'liver')
 liver_statistics.to_excel(writer, 'liver_statistics')
 writer.save()
 
-# 打印dice global
+# Print dice global
 print('dice global:', dice_intersection / dice_union)

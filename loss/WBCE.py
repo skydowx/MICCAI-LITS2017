@@ -1,7 +1,9 @@
 """
 
-加权交叉熵损失函数
-统计了一下训练集下的正负样本的比例，接近20:1
+
+a weighted cross entropy loss function
+Count the ratio of positive and negative samples under the training set, which is close to 20:1
+
 """
 
 import torch

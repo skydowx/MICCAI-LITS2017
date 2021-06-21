@@ -1,6 +1,6 @@
 """
 
-选取合适的截断阈值
+Choose a suitable cutoff threshold
 """
 
 import os
@@ -36,5 +36,5 @@ for file in tqdm(os.listdir(para.train_ct_path)):
 
 print(num_inlier / num_point)
 
-# -200 到 200 的阈值对于肝脏：训练集99.49%， 测试集99..0%
-# -200 到 200 的阈值对于肿瘤：训练集99.95%， 测试集99.45%
+# -200 to 200 threshold for the liver: 99.49% for the training set, 99..0% for the test set
+# -200 to 200 threshold for tumors: 99.95% on the training set, 99.45% on the test set

@@ -1,6 +1,6 @@
 """
 
-查看肝脏区域slice占据整体slice的比例
+View the ratio of slices in the liver area to the overall slice
 """
 
 import os
@@ -33,5 +33,5 @@ for file in tqdm(os.listdir(para.test_seg_path)):
 
 print(total_liver_slice / total_slice)
 
-# 训练集包含肝脏的slice整体占比: 30.61%
-# 测试集包含肝脏的slice整体占比: 73.46%
+# The overall proportion of slices with liver in the training set: 30.61%
+# The overall proportion of slices containing liver in the test set: 73.46%

@@ -16,10 +16,10 @@ class SSLoss(nn.Module):
 
         smooth = 1
 
-        # jaccard系数的定义
+        # Definition of jaccard coefficient
         s1 = ((pred - target).pow(2) * target).sum(dim=1).sum(dim=1).sum(dim=1) / (smooth + target.sum(dim=1).sum(dim=1).sum(dim=1))
 
         s2 = ((pred - target).pow(2) * (1 - target)).sum(dim=1).sum(dim=1).sum(dim=1) / (smooth + (1 - target).sum(dim=1).sum(dim=1).sum(dim=1))
 
-        # 返回的是jaccard距离
+        # What is returned is the jaccard distance
         return (0.05 * s1 + 0.95 * s2).mean()

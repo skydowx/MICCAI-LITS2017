@@ -17,9 +17,9 @@ class JaccardLoss(nn.Module):
 
         smooth = 1
 
-        # jaccard系数的定义
+        # Definition of jaccard coefficient
         dice = (pred * target).sum(dim=1).sum(dim=1).sum(dim=1) / (pred.pow(2).sum(dim=1).sum(dim=1).sum(dim=1) +
                                             target.pow(2).sum(dim=1).sum(dim=1).sum(dim=1) - (pred * target).sum(dim=1).sum(dim=1).sum(dim=1) + smooth)
 
-        # 返回的是jaccard距离
+        # returns the jaccard distance
         return torch.clamp((1 - dice).mean(), 0, 1)

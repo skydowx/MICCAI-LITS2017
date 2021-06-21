@@ -1,6 +1,8 @@
 """
 
-网络定义脚本
+
+
+网络定义脚本 - Network definition script
 """
 
 import os
@@ -18,6 +20,7 @@ class ResUNet(nn.Module):
     """
 
     共9498260个可训练的参数, 接近九百五十万
+    A total of 9498260 trainable parameters, close to 9.5 million
     """
     def __init__(self, training):
         super().__init__()
@@ -141,28 +144,28 @@ class ResUNet(nn.Module):
             nn.PReLU(32)
         )
 
-        # 最后大尺度下的映射（256*256），下面的尺度依次递减
+        # Finally, the mapping under the large scale (256*256), the scales below are successively decreasing
         self.map4 = nn.Sequential(
             nn.Conv3d(32, 1, 1, 1),
             nn.Upsample(scale_factor=(1, 2, 2), mode='trilinear'),
             nn.Sigmoid()
         )
 
-        # 128*128 尺度下的映射
+        # Mapping at 128*128 scale
         self.map3 = nn.Sequential(
             nn.Conv3d(64, 1, 1, 1),
             nn.Upsample(scale_factor=(2, 4, 4), mode='trilinear'),
             nn.Sigmoid()
         )
 
-        # 64*64 尺度下的映射
+        # Mapping at 64*64 scale
         self.map2 = nn.Sequential(
             nn.Conv3d(128, 1, 1, 1),
             nn.Upsample(scale_factor=(4, 8, 8), mode='trilinear'),
             nn.Sigmoid()
         )
 
-        # 32*32 尺度下的映射
+        # Mapping under the 32*32 scale
         self.map1 = nn.Sequential(
             nn.Conv3d(256, 1, 1, 1),
             nn.Upsample(scale_factor=(8, 16, 16), mode='trilinear'),
@@ -230,5 +233,5 @@ def init(module):
 net = ResUNet(training=True)
 net.apply(init)
 
-# 计算网络参数
+# Calculate network parameters
 print('net total parameters:', sum(param.numel() for param in net.parameters()))

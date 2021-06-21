@@ -18,9 +18,9 @@ class TverskyLoss(nn.Module):
 
         smooth = 1
 
-        # dice系数的定义
+        # Definition of dice coefficient
         dice = (pred * target).sum(dim=1).sum(dim=1).sum(dim=1) / ((pred * target).sum(dim=1).sum(dim=1).sum(dim=1)+
                                             0.3 * (pred * (1 - target)).sum(dim=1).sum(dim=1).sum(dim=1) + 0.7 * ((1 - pred) * target).sum(dim=1).sum(dim=1).sum(dim=1) + smooth)
 
-        # 返回的是dice距离
+        # What is returned is the dice distance
         return torch.clamp((1 - dice).mean(), 0, 2)

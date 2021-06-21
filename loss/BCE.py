@@ -1,6 +1,7 @@
 """
 
-二值交叉熵损失函数
+Binary cross entropy loss function
+
 """
 
 import torch.nn as nn

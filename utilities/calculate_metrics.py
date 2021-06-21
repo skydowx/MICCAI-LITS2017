@@ -1,6 +1,6 @@
 """
 
-计算基于重叠度和距离等九种分割常见评价指标
+Calculate nine common evaluation indicators of segmentation based on overlap and distance
 """
 
 import math
@@ -15,9 +15,9 @@ class Metirc():
     def __init__(self, real_mask, pred_mask, voxel_spacing):
         """
 
-        :param real_mask: 金标准
-        :param pred_mask: 预测结果
-        :param voxel_spacing: 体数据的spacing
+        :param real_mask: gold standard
+        :param pred_mask: forecast result
+        :param voxel_spacing: Spacing of volume data
         """
         self.real_mask = real_mask
         self.pred_mask = pred_mask
@@ -34,11 +34,11 @@ class Metirc():
         """
 
         :param mask: ndarray
-        :param voxel_spacing: 体数据的spacing
-        :return: 提取array的表面点的真实坐标(以mm为单位)
+        :param voxel_spacing: Spacing of volume data
+        :return: Extract the real coordinates of the surface points of the array (in mm)
         """
 
-        # 卷积核采用的是三维18邻域
+        # The convolution kernel uses three-dimensional 18 neighborhoods
 
         kernel = morphology.generate_binary_structure(3, 2)
         surface = morphology.binary_erosion(mask, kernel) ^ mask
@@ -48,13 +48,13 @@ class Metirc():
         surface_pts = np.array(list(zip(surface_pts[0], surface_pts[1], surface_pts[2])))
 
         # (0.7808688879013062, 0.7808688879013062, 2.5) (88, 410, 512)
-        # 读出来的数据spacing和shape不是对应的,所以需要反向
+        # The spacing and shape of the read data are not corresponding, so they need to be reversed.
         return surface_pts * np.array(self.voxel_sapcing[::-1]).reshape(1, 3)
 
     def get_pred2real_nn(self):
         """
 
-        :return: 预测结果表面体素到金标准表面体素的最小距离
+        :return: The minimum distance from the predicted result surface voxel to the gold standard surface voxel
         """
 
         tree = spatial.cKDTree(self.real_mask_surface_pts)
@@ -65,18 +65,18 @@ class Metirc():
     def get_real2pred_nn(self):
         """
 
-        :return: 金标准表面体素到预测结果表面体素的最小距离
+        :return: The minimum distance from the gold standard 
         """
         tree = spatial.cKDTree(self.pred_mask_surface_pts)
         nn, _ = tree.query(self.real_mask_surface_pts)
 
         return nn
 
-    # 下面的六个指标是基于重叠度的
+    # The following six indicators are based on overlap
     def get_dice_coefficient(self):
         """
 
-        :return: dice系数 dice系数的分子 dice系数的分母(后两者用于计算dice_global)
+        :return: dice coefficient numerator of dice coefficient denominator of dice coefficient (the latter two are used to calculate dice_global)
         """
         intersection = (self.real_mask * self.pred_mask).sum()
         union = self.real_mask.sum() + self.pred_mask.sum()
@@ -86,7 +86,7 @@ class Metirc():
     def get_jaccard_index(self):
         """
 
-        :return: 杰卡德系数
+        :return: Jaccard coefficient
         """
         intersection = (self.real_mask * self.pred_mask).sum()
         union = (self.real_mask | self.pred_mask).sum()
@@ -96,7 +96,7 @@ class Metirc():
     def get_VOE(self):
         """
 
-        :return: 体素重叠误差 Volumetric Overlap Error
+        :return: Volumetric Overlap Error
         """
 
         return 1 - self.get_jaccard_index()
@@ -104,7 +104,7 @@ class Metirc():
     def get_RVD(self):
         """
 
-        :return: 体素相对误差 Relative Volume Difference
+        :return: Relative Volume Difference
         """
 
         return float(self.pred_mask.sum() - self.real_mask.sum()) / float(self.real_mask.sum())
@@ -112,7 +112,7 @@ class Metirc():
     def get_FNR(self):
         """
 
-        :return: 欠分割率 False negative rate
+        :return: False negative rate
         """
         fn = self.real_mask.sum() - (self.real_mask * self.pred_mask).sum()
         union = (self.real_mask | self.pred_mask).sum()
@@ -122,18 +122,18 @@ class Metirc():
     def get_FPR(self):
         """
 
-        :return: 过分割率 False positive rate
+        :return: False positive rate
         """
         fp = self.pred_mask.sum() - (self.real_mask * self.pred_mask).sum()
         union = (self.real_mask | self.pred_mask).sum()
 
         return fp / union
 
-    # 下面的三个指标是基于距离的
+    # The following three indicators are based on distance
     def get_ASSD(self):
         """
 
-        :return: 对称位置平均表面距离 Average Symmetric Surface Distance
+        :return: Average Symmetric Surface Distance
         """
         return (self.pred2real_nn.sum() + self.real2pred_nn.sum()) / \
                (self.real_mask_surface_pts.shape[0] + self.pred_mask_surface_pts.shape[0])
@@ -141,7 +141,7 @@ class Metirc():
     def get_RMSD(self):
         """
 
-        :return: 对称位置表面距离的均方根 Root Mean Square symmetric Surface Distance
+        :return: Root Mean Square symmetric Surface Distance
         """
         return math.sqrt((np.power(self.pred2real_nn, 2).sum() + np.power(self.real2pred_nn, 2).sum()) /
                          (self.real_mask_surface_pts.shape[0] + self.pred_mask_surface_pts.shape[0]))
@@ -149,6 +149,6 @@ class Metirc():
     def get_MSD(self):
         """
 
-        :return: 对称位置的最大表面距离 Maximum Symmetric Surface Distance
+        :return: Maximum Symmetric Surface Distance
         """
         return max(self.pred2real_nn.max(), self.real2pred_nn.max())

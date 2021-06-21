@@ -1,6 +1,7 @@
 """
 
-训练脚本
+Training script
+
 """
 
 import os
@@ -29,39 +30,39 @@ from net.ResUNet import net
 
 import parameter as para
 
-# 设置visdom
+# Set up visdom
 viz = Visdom(port=666)
 step_list = [0]
 win = viz.line(X=np.array([0]), Y=np.array([1.0]), opts=dict(title='loss'))
 
-# 设置显卡相关
+# Set graphics card related
 os.environ['CUDA_VISIBLE_DEVICES'] = para.gpu
 cudnn.benchmark = para.cudnn_benchmark
 
-# 定义网络
+# Define the network
 net = torch.nn.DataParallel(net).cuda()
 net.train()
 
-# 定义Dateset
+# Define Dataset
 train_ds = Dataset(os.path.join(para.training_set_path, 'ct'), os.path.join(para.training_set_path, 'seg'))
 
-# 定义数据加载
+# Define data loading
 train_dl = DataLoader(train_ds, para.batch_size, True, num_workers=para.num_workers, pin_memory=para.pin_memory)
 
-# 挑选损失函数
+# Pick loss function
 loss_func_list = [DiceLoss(), ELDiceLoss(), WCELoss(), JaccardLoss(), SSLoss(), TverskyLoss(), HybridLoss(), BCELoss()]
 loss_func = loss_func_list[5]
 
-# 定义优化器
+# Define optimizer
 opt = torch.optim.Adam(net.parameters(), lr=para.learning_rate)
 
-# 学习率衰减
+# Learning rate decay
 lr_decay = torch.optim.lr_scheduler.MultiStepLR(opt, para.learning_rate_decay)
 
-# 深度监督衰减系数
+# Depth supervision attenuation coefficient
 alpha = para.alpha
 
-# 训练网络
+# Training network
 start = time()
 for epoch in range(para.Epoch):
 
@@ -99,17 +100,17 @@ for epoch in range(para.Epoch):
 
     mean_loss = sum(mean_loss) / len(mean_loss)
 
-    # 保存模型
+    # Save the model
     if epoch % 50 is 0 and epoch is not 0:
 
-        # 网络模型的命名方式为：epoch轮数+当前minibatch的loss+本轮epoch的平均loss
+        # The naming method of the network model is: the number of epoch rounds + the loss of the current minibatch + the average loss of the current epoch
         torch.save(net.state_dict(), './module/net{}-{:.3f}-{:.3f}.pth'.format(epoch, loss, mean_loss))
 
-    # 对深度监督系数进行衰减
+    # Attenuate the depth supervision coefficient
     if epoch % 40 is 0 and epoch is not 0:
         alpha *= 0.8
 
-# 深度监督的系数变化
+# In-depth supervision of coefficient changes
 # 1.000
 # 0.800
 # 0.640
